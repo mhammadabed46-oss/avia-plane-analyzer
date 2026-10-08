@@ -1,0 +1,631 @@
+Build an Android application called:
+
+Avia Plane Screen Analyzer
+
+The application is a screen-monitoring and statistical-analysis tool.
+
+Its main purpose is NOT manual data entry.
+
+The application should monitor the user's Android screen while the Avia Plane game is running, visually detect the multiplier displayed by the game, automatically record each completed round, and continuously calculate historical statistics.
+
+IMPORTANT:
+The application must be designed as an analysis and data-recording tool only. It must NOT claim to predict the next result with certainty, guarantee profit, or automatically place bets.
+
+━━━━━━━━━━━━━━━━━━
+
+1. MAIN CONCEPT
+   ━━━━━━━━━━━━━━━━━━
+
+The user opens the Avia Plane game normally.
+
+Then the user starts:
+
+SCREEN MONITORING
+
+The application should:
+
+1. Monitor the screen.
+2. Identify the area where the multiplier is displayed.
+3. Read the multiplier using OCR / computer vision.
+4. Detect when a new round starts.
+5. Detect when the current round ends.
+6. Capture the final multiplier.
+7. Save it automatically.
+8. Add it to the historical database.
+9. Update statistics immediately.
+10. Display the latest analysis.
+
+The user should NOT have to type the multiplier manually.
+
+━━━━━━━━━━━━━━━━━━
+2. ANDROID SCREEN ACCESS
+━━━━━━━━━━━━━━━━━━
+
+Use appropriate Android APIs for screen capture, such as:
+
+MediaProjection API
+
+The application must request the necessary Android permission before monitoring the screen.
+
+Clearly explain to the user why screen capture permission is required.
+
+The application should not access:
+
+- Contacts
+- Messages
+- Phone calls
+- Location
+- Microphone
+
+unless absolutely required.
+
+Screen monitoring must stop immediately when the user presses:
+
+STOP MONITORING
+
+━━━━━━━━━━━━━━━━━━
+3. OCR / VISUAL RECOGNITION
+━━━━━━━━━━━━━━━━━━
+
+Use an appropriate on-device OCR/computer-vision solution.
+
+Preferred approach:
+
+Google ML Kit Text Recognition or another reliable Android-compatible OCR library.
+
+The system should search the captured screen for values matching patterns such as:
+
+1.24x
+2.51x
+10.32x
+100.45x
+
+The "x" may or may not be detected by OCR.
+
+The system should therefore recognize numeric multiplier patterns even if OCR returns:
+
+1.24
+2.51
+10.32
+
+Do NOT simply read every number on the screen.
+
+The system must attempt to identify the multiplier based on:
+
+- Position
+- Size
+- Formatting
+- Repeated location
+- Numeric pattern
+- Changes between frames
+
+━━━━━━━━━━━━━━━━━━
+4. CALIBRATION
+━━━━━━━━━━━━━━━━━━
+
+Because different phones and versions of the game may display the multiplier in different locations, create a calibration system.
+
+When monitoring starts for the first time:
+
+Display:
+
+Select Multiplier Area
+
+Allow the user to draw/select a rectangular area around the multiplier on the screen.
+
+Save this region.
+
+After calibration, OCR should primarily analyze this selected region instead of the entire screen.
+
+Provide:
+
+Recalibrate
+
+if the user changes the game layout.
+
+━━━━━━━━━━━━━━━━━━
+5. ROUND DETECTION
+━━━━━━━━━━━━━━━━━━
+
+The application must distinguish between:
+
+- Current multiplier
+- Final multiplier
+- Previous round
+- New round
+
+Do not record the same round repeatedly.
+
+For example, if the screen displays:
+
+1.05x
+1.12x
+1.25x
+1.43x
+1.72x
+2.04x
+2.31x
+
+these are NOT seven different rounds.
+
+They represent one round.
+
+The application should save only the final multiplier when the round ends.
+
+Example:
+
+Round #105 → 2.31x
+
+Then wait for the next round.
+
+━━━━━━━━━━━━━━━━━━
+6. DUPLICATE PROTECTION
+━━━━━━━━━━━━━━━━━━
+
+Implement strong duplicate protection.
+
+The same multiplier must not be saved multiple times simply because the screen remained unchanged for several frames.
+
+Use:
+
+- Timestamp
+- Value
+- Screen-state change
+- Round-state detection
+
+to distinguish separate rounds.
+
+━━━━━━━━━━━━━━━━━━
+7. REAL-TIME MONITORING SCREEN
+━━━━━━━━━━━━━━━━━━
+
+Create a monitoring interface showing:
+
+MONITORING: ON
+
+Current detected value:
+2.31x
+
+Last completed round:
+2.31x
+
+Rounds recorded:
+127
+
+Detection status:
+Reading screen...
+
+When a round is successfully recorded:
+
+NEW RESULT DETECTED
+2.31x
+
+Then automatically return to:
+
+Waiting for next round...
+
+━━━━━━━━━━━━━━━━━━
+8. FLOATING OVERLAY
+━━━━━━━━━━━━━━━━━━
+
+If technically possible within Android permissions, create a small floating overlay that can remain visible while the game is open.
+
+The overlay should be minimal and movable.
+
+Example:
+
+┌────────────────────┐
+│ AVIA ANALYZER      │
+│ Last: 2.31x        │
+│ Rounds: 127        │
+│ Avg: 2.18x         │
+│ [STOP]             │
+└────────────────────┘
+
+The overlay must NOT interfere with the game.
+
+Allow the user to:
+
+- Move it
+- Minimize it
+- Hide it
+- Stop monitoring
+
+━━━━━━━━━━━━━━━━━━
+9. AUTOMATIC DATABASE
+━━━━━━━━━━━━━━━━━━
+
+Every detected completed round should automatically be stored locally.
+
+Each record should contain:
+
+Round number
+Multiplier
+Date
+Time
+Detection confidence
+
+Example:
+
+#127 | 2.31x | 09/10/2026 02:15 | 96%
+
+Do not upload the user's screen or results to an external server unless explicitly required.
+
+Prefer local storage.
+
+━━━━━━━━━━━━━━━━━━
+10. DETECTION CONFIDENCE
+━━━━━━━━━━━━━━━━━━
+
+Every OCR detection should receive a confidence score.
+
+Example:
+
+2.31x
+Detection confidence: 96%
+
+If confidence is too low, do NOT automatically save the result.
+
+Instead display:
+
+Low confidence — waiting for clearer detection
+
+Allow the user to review uncertain results if necessary.
+
+━━━━━━━━━━━━━━━━━━
+11. STATISTICS
+━━━━━━━━━━━━━━━━━━
+
+Automatically calculate:
+
+Total rounds
+Average
+Median
+Minimum
+Maximum
+
+Also calculate:
+
+Below 1.20x
+1.20x–1.49x
+1.50x–1.99x
+2.00x–2.99x
+3.00x–4.99x
+5.00x–9.99x
+10x+
+
+Display both:
+
+Count
+Percentage
+
+━━━━━━━━━━━━━━━━━━
+12. RECENT DATA
+━━━━━━━━━━━━━━━━━━
+
+Provide analysis for:
+
+Last 10
+Last 20
+Last 50
+Last 100
+
+Display:
+
+Average
+Median
+Minimum
+Maximum
+Percentage below 2x
+Percentage above 2x
+Percentage above 5x
+
+━━━━━━━━━━━━━━━━━━
+13. SEQUENCE ANALYSIS
+━━━━━━━━━━━━━━━━━━
+
+Analyze historical sequences.
+
+Examples:
+
+Current consecutive results below 2x
+
+Longest historical sequence below 2x
+
+Current consecutive results above 2x
+
+Longest historical sequence above 2x
+
+Recent average
+
+Recent volatility
+
+IMPORTANT:
+
+Do NOT interpret these sequences as proof that the next round must change.
+
+Display a clear disclaimer:
+
+"Sequence analysis describes historical data only. It does not determine the next result."
+
+━━━━━━━━━━━━━━━━━━
+14. HISTORICAL SIGNAL INDICATOR
+━━━━━━━━━━━━━━━━━━
+
+Create an optional indicator called:
+
+Historical Pattern Indicator
+
+Possible states:
+
+LOW
+NORMAL
+HIGH
+
+This indicator must describe the historical dataset only.
+
+It must NOT say:
+
+"Next round will be high."
+
+It must NOT say:
+
+"Guaranteed."
+
+It must NOT claim certainty.
+
+Use wording such as:
+
+"Current historical pattern"
+
+and:
+
+"This is not a prediction."
+
+━━━━━━━━━━━━━━━━━━
+15. DATA QUALITY
+━━━━━━━━━━━━━━━━━━
+
+Create:
+
+Data Quality
+
+Based on number of successfully recorded rounds:
+
+0–20:
+Insufficient sample
+
+21–50:
+Limited sample
+
+51–100:
+Moderate sample
+
+101+:
+Large historical sample
+
+This refers only to the amount of historical data available.
+
+━━━━━━━━━━━━━━━━━━
+16. CHARTS
+━━━━━━━━━━━━━━━━━━
+
+Create a real-time chart showing the recorded multipliers.
+
+Allow:
+
+10 rounds
+20 rounds
+50 rounds
+100 rounds
+All
+
+Also provide a distribution chart showing the multiplier categories.
+
+━━━━━━━━━━━━━━━━━━
+17. HISTORY
+━━━━━━━━━━━━━━━━━━
+
+Create a complete history page.
+
+Example:
+
+#128 — 1.27x
+#127 — 2.31x
+#126 — 1.04x
+#125 — 5.81x
+#124 — 1.63x
+
+Allow:
+
+- Search
+- Filter
+- Delete individual result
+- Clear all data
+- Export CSV
+
+━━━━━━━━━━━━━━━━━━
+18. MANUAL CORRECTION
+━━━━━━━━━━━━━━━━━━
+
+Although the application is designed for automatic screen reading, provide an optional manual correction feature.
+
+If OCR incorrectly detects:
+
+2.13x
+
+but the actual value was:
+
+2.18x
+
+the user should be able to correct it.
+
+Manual entry should be an exception, not the primary workflow.
+
+━━━━━━━━━━━━━━━━━━
+19. MONITORING CONTROLS
+━━━━━━━━━━━━━━━━━━
+
+Main controls:
+
+START MONITORING
+
+STOP MONITORING
+
+PAUSE
+
+RECALIBRATE
+
+The application must clearly show whether monitoring is:
+
+OFF
+PAUSED
+ACTIVE
+WAITING
+DETECTING
+RESULT SAVED
+
+━━━━━━━━━━━━━━━━━━
+20. ERROR HANDLING
+━━━━━━━━━━━━━━━━━━
+
+If the application cannot read the multiplier:
+
+"Multiplier not detected."
+
+If the screen changes:
+
+"Screen layout changed — recalibration may be required."
+
+If OCR confidence is low:
+
+"Low confidence — waiting for clearer result."
+
+If screen capture permission is lost:
+
+"Screen monitoring permission is required."
+
+The application should never silently create fake results.
+
+━━━━━━━━━━━━━━━━━━
+21. LANGUAGE
+━━━━━━━━━━━━━━━━━━
+
+Support:
+
+English
+Arabic
+
+Arabic must support proper RTL layout.
+
+Add a language switch:
+
+EN | العربية
+
+━━━━━━━━━━━━━━━━━━
+22. DARK MODE
+━━━━━━━━━━━━━━━━━━
+
+Support:
+
+Light Mode
+Dark Mode
+System Default
+
+The monitoring overlay should remain highly readable in both modes.
+
+━━━━━━━━━━━━━━━━━━
+23. PERFORMANCE
+━━━━━━━━━━━━━━━━━━
+
+The application should be optimized for Android phones.
+
+Do not perform unnecessary full-screen OCR continuously if it can be avoided.
+
+Once the multiplier region has been calibrated, process only that region whenever possible.
+
+Use an efficient sampling frequency.
+
+Avoid excessive battery consumption.
+
+Do not save every video frame.
+
+Only store detected results and necessary metadata.
+
+━━━━━━━━━━━━━━━━━━
+24. PRIVACY
+━━━━━━━━━━━━━━━━━━
+
+Screen images should preferably be processed locally on the device.
+
+Do not upload screenshots to external servers.
+
+Do not store complete screenshots unless explicitly needed for debugging and the user enables this option.
+
+The user must always be able to stop monitoring.
+
+━━━━━━━━━━━━━━━━━━
+25. IMPORTANT TECHNICAL REQUIREMENT
+━━━━━━━━━━━━━━━━━━
+
+Before building the entire application, create a working prototype of the most important function:
+
+SCREEN → OCR → MULTIPLIER DETECTION → RESULT SAVED
+
+Test this first.
+
+Only after successful detection should the rest of the statistics interface be implemented.
+
+If OCR alone is unreliable, use a combination of:
+
+OCR
+Image preprocessing
+Region detection
+Frame comparison
+Pattern recognition
+
+Do not invent results when detection fails.
+
+━━━━━━━━━━━━━━━━━━
+26. FINAL TEST
+━━━━━━━━━━━━━━━━━━
+
+Test the application with a sequence such as:
+
+1.24x
+1.08x
+2.31x
+1.47x
+5.62x
+1.12x
+3.44x
+
+The application should automatically produce:
+
+7 completed rounds
+
+and calculate all statistics.
+
+Verify that intermediate changing values within one round are not recorded as separate rounds.
+
+━━━━━━━━━━━━━━━━━━
+27. FINAL DELIVERABLE
+━━━━━━━━━━━━━━━━━━
+
+Build the complete Android project.
+
+Provide:
+
+1. Complete source code.
+2. Working Android application.
+3. Instructions for installing it on an Android phone.
+4. Instructions for granting screen-capture permission.
+5. Instructions for calibration.
+6. Instructions for starting and stopping monitoring.
+7. Instructions for creating an APK/AAB.
+
+Most importantly:
+
+The application must actually monitor the Android screen and automatically extract the multiplier.
+
+Manual result entry must NOT be the main method of collecting data.
