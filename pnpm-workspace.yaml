@@ -160,3 +160,11 @@ overrides:
   esbuild: "0.28.2"
   # orval pins js-yaml to an exact version older than the CVE fix (>=4.3.2)
   js-yaml: '4.3.2'
+  # Security overrides for vulnerable transitive dependencies. xcode supports UUID v11's CJS API;
+  # Expo Router uses query-string's compatible parse/stringify API.
+  "minimatch>brace-expansion": "5.0.12"
+  proxy-addr: "2.0.8"
+  source-map-js: "1.2.2"
+  fast-uri: "3.1.8"
+  "xcode>uuid": "11.1.1"
+  "expo-router>query-string": "9.5.1"
