@@ -168,3 +168,7 @@ overrides:
   fast-uri: "3.1.8"
   "xcode>uuid": "11.1.1"
   "expo-router>query-string": "9.5.1"
+
+patchedDependencies:
+  braces@3.0.3: patches/braces@3.0.3.patch
+  node-forge@1.4.0: patches/node-forge@1.4.0.patch

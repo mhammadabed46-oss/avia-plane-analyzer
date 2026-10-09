@@ -1,0 +1,1 @@
+- [Local dependency security backports](dependency-security-backports.md) — retain local fixes until equivalent upstream releases exist; registry audits still flag affected versions.
